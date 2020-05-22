@@ -68,22 +68,21 @@ class LossHistory(keras.callbacks.Callback):
         plt.show()
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-batch_size = 50
+batch_size = 100
 input_shape = (224, 224, 3)
 kernel_size = 3
 filters = 16
 latent_dim = 64
 intermediate_dim = 64
 epochs = 1000
-num_classes = 50
-unseen_class = [6, 14, 15, 18, 24, 25, 34, 39, 42, 48]
-num_unseen_classes = 10
+num_classes = 38
+unseen_class = [0, 6, 7, 11, 15, 16, 18, 20, 22, 25, 27, 36, 37]
+num_unseen_classes = 13
 
-path = 'data/AwA2/'
+path = 'data/plant/'
 
-#seen_x = np.load(path+'AwA2_seen_x_100.npy')
-#seen_y = np.load(path+'AwA2_seen_y_100.npy')
+#seen_x = np.load(path+'plant_seen_x_100.npy')
+#seen_y = np.load(path+'plant_seen_y_100.npy')
 ##unseen_x = np.load(path+'AwA2_unseen_x.npy')
 ##unseen_y = np.load(path+'AwA2_unseen_y.npy')
 
@@ -108,12 +107,15 @@ y_test = np.load(path+'y_test_100.npy')
 y_train = to_categorical(y_train, num_classes)
 y_test = to_categorical(y_test, num_classes)
 
+#print(x_train.shape)
+#print(x_test.shape)
+#print(y_train.shape)
+#print(y_test.shape)
 
 temp = np.eye(num_classes).reshape(1,num_classes*num_classes)
-##y_class_train = np.repeat(a=temp, repeats=24269, axis=0).reshape(24269, num_classes, num_classes)
-##y_class_test =  np.repeat(a=temp, repeats=6068, axis=0).reshape(6068, num_classes, num_classes)
-y_class_train = np.repeat(a=temp, repeats=3200, axis=0).reshape(3200, num_classes, num_classes)
-y_class_test =  np.repeat(a=temp, repeats=800, axis=0).reshape(800, num_classes, num_classes)
+y_class_train = np.repeat(a=temp, repeats=4000*(num_classes-num_unseen_classes), axis=0).reshape(4000*(num_classes-num_unseen_classes),num_classes,num_classes)
+y_class_test =  np.repeat(a=temp, repeats=1000*(num_classes-num_unseen_classes), axis=0).reshape(1000*(num_classes-num_unseen_classes),num_classes,num_classes)
+
 
 x_in = Input(shape=input_shape)
 x = x_in
@@ -123,7 +125,7 @@ mc1_x = mc1(x)
 #mc1_x = Flatten()(mc1_x)
 mc1_h = Dense(intermediate_dim, activation='relu')(mc1_x)
 ###############input_2#########################
-for i in range(2):
+for i in range(3):
     filters *= 2
     x = Conv2D(filters=filters,
                kernel_size=kernel_size,
@@ -196,7 +198,7 @@ x = BatchNormalization()(x)
 x = Dropout(0.2)(x)
 x = Reshape((shape[1], shape[2], shape[3]))(x)
 
-for i in range(2):
+for i in range(3):
     x = Conv2DTranspose(filters=filters,
                         kernel_size=kernel_size,
                         strides=2,
@@ -240,7 +242,7 @@ vae.compile(optimizer='adam')
 vae.summary()
 
 history = LossHistory()
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0)
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=0)
 
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_loss', 
                                             patience=10, 
@@ -263,12 +265,12 @@ vae.fit([x_train, y_train, y_class_train],
 history.loss_plot('epoch')
 
 mean_encoder = Model(x_in, z_plus_mean)
-mean_encoder.save('model/AwA2/mean_encoder.h5')
+mean_encoder.save('model/plant/mean_encoder.h5')
 
 var_encoder = Model(x_in, z_plus_log_var)
-var_encoder.save('model/AwA2/var_encoder.h5')
+var_encoder.save('model/plant/var_encoder.h5')
 
-decoder.save('model/AwA2/generator.h5')
+decoder.save('model/plant/generator.h5')
 
 mu = Model(y, yh)
-mu.save('model/AwA2/y_encoder.h5')
+mu.save('model/plant/y_encoder.h5')

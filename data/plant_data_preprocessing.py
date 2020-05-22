@@ -9,7 +9,7 @@ import cv2
 from PIL import Image
 
 image_size = 224          # 指定图片大小
-path = '/Users/keiko/tensorflow/Animals_with_Attributes2/'   #文件读取路径
+path = '/Users/keiko/tensorflow/new-plant-diseases-dataset/New Plant Diseases Dataset(Augmented)/'   #文件读取路径
 
 classname = pd.read_csv(path+'classes.txt',header=None,sep = '\t')
 dic_class2name = {classname.index[i]:classname.loc[i][1] for i in range(classname.shape[0])}    
@@ -43,7 +43,7 @@ def load_Img(imgDir,read_num = 'max'):
         data[i,:,:,:] = arr
     return data,imgNum 
 
-def load_data(data, num):
+def load_data(data, num, mode):
     read_num = num
     
     data_list = []
@@ -51,7 +51,7 @@ def load_data(data, num):
    
     
     for item in data.iloc[:,0].values.tolist():
-        tup = load_Img(path+'JPEGImages/'+item,read_num=read_num)
+        tup = load_Img(path+mode+item,read_num=read_num)
         data_list.append(tup[0])
         label_list += [dic_name2class[item]]*tup[1]
         
@@ -59,18 +59,18 @@ def load_data(data, num):
     
     return np.row_stack(data_list),np.array(label_list)
 
-train_classes = pd.read_csv(path+'trainclasses.txt',header=None)
-test_classes = pd.read_csv(path+'testclasses.txt',header=None)
+train_classes = pd.read_csv(path+'trainclasses.txt',header=None,sep = '\t')
+test_classes = pd.read_csv(path+'testclasses.txt',header=None,sep = '\t')
 
-traindata,trainlabel = load_data(train_classes, num=100)
-np.save(path+'AWA2_traindata_100.npy',traindata)
-np.save(path+'AWA2_trainlabel_100.npy',trainlabel)
+traindata,trainlabel = load_data(train_classes, num=200, mode='train/')
+np.save(path+'plant_traindata_100.npy',traindata)
+np.save(path+'plant_trainlabel_100.npy',trainlabel)
 
 print(traindata.shape,trainlabel.shape)
 
-testdata,testlabel = load_data(test_classes, num=100)
-np.save(path+'AWA2_testdata_100.npy',testdata)
-np.save(path+'AWA2_testlabel_100.npy',testlabel)
+testdata,testlabel = load_data(test_classes, num=200, mode='valid/')
+np.save(path+'plant_testdata_100.npy',testdata)
+np.save(path+'plant_testlabel_100.npy',testlabel)
 
 print(testdata.shape,testlabel.shape)
 

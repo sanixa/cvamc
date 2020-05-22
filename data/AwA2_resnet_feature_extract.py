@@ -22,10 +22,10 @@ path = '/Users/keiko/tensorflow/Animals_with_Attributes2/'   #文件读取路径
 image_size = 224
 
 ###################load data-----------------------------------------------------
-traindata = np.load(path+'AWA2_traindata.npy')
+traindata = np.load(path+'AWA2_traindata_100.npy')
 #trainlabel = np.load(path+'AWA2_trainlabel.npy')
 
-testdata = np.load(path+'AWA2_testdata.npy')
+testdata = np.load(path+'AWA2_testdata_100.npy')
 #testlabel = np.load(path+'AWA2_testlabel.npy')
 
 
@@ -39,7 +39,7 @@ model = ResNet101(include_top=False, weights='imagenet', input_shape=(image_size
                   layers=keras.layers, models=keras.models, utils=keras.utils, pooling='avg')
 
 traindata = model.predict(traindata)
-np.save(path+'AWA2_resnet101_traindata.npy',traindata)
+np.save(path+'AWA2_resnet101_traindata_100.npy',traindata)
 
 testdata = model.predict(testdata)
-np.save(path+'AWA2_resnet101_testdata.npy',testdata)
+np.save(path+'AWA2_resnet101_testdata_100.npy',testdata)
